@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급 생명과학 18장 · 유전자 발현 조절 암기 프로그램</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;padding:1rem}
+  .app{max-width:700px;margin:0 auto}
+  .header{text-align:center;margin-bottom:1.5rem}
+  .header h2{font-size:20px;font-weight:500;margin-bottom:4px}
+  .header p{font-size:13px;color:#666}
+  .tab-row{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid #ddd}
+  .tab{font-size:14px;padding:10px 20px;cursor:pointer;border:none;background:transparent;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit}
+  .tab.active{color:#1a1a1a;border-bottom:2px solid #1a1a1a;font-weight:500}
+  .section{display:none}.section.active{display:block}
+  .ctrl-row{display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
+  .btn{font-size:13px;padding:7px 16px;border:1px solid #ccc;border-radius:8px;cursor:pointer;background:#fff;color:#1a1a1a;font-family:inherit}
+  .btn:hover{background:#f0f0f0}
+  .btn.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .btn.primary:hover{background:#333}
+  .btn.active-mode{background:#eee;font-weight:500;border-color:#999}
+  .progress{font-size:13px;color:#888;margin-left:auto}
+  .score-bar{display:flex;gap:10px;margin-bottom:1.2rem}
+  .score-chip{font-size:13px;padding:4px 14px;border-radius:8px;background:#eee;color:#555}
+  .score-chip span{font-weight:600;color:#1a1a1a}
+  .card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .q-label{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+  .q-text{font-size:16px;line-height:1.75;color:#1a1a1a;margin-bottom:.75rem}
+  .blank{display:inline-block;background:#f0f0f0;border:1px solid #ccc;border-radius:4px;padding:0 6px;min-width:80px;text-align:center;color:#aaa;font-style:italic}
+  .hint{font-size:13px;color:#888;margin-bottom:.75rem}
+  .ans-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .ans-input{font-size:15px;padding:7px 12px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;flex:1;min-width:120px;font-family:inherit}
+  .ans-input:focus{outline:none;border-color:#888}
+  .feedback{font-size:14px;margin-top:.75rem;padding:.6rem .9rem;border-radius:8px;line-height:1.6}
+  .feedback.correct{background:#e8f5e9;color:#2e7d32}
+  .feedback.wrong{background:#fce8e8;color:#c62828}
+  .explain{font-size:13px;margin-top:.4rem;color:#555;line-height:1.6}
+  .q2-card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+  .q2-text{font-size:15px;line-height:1.75;color:#1a1a1a;margin-bottom:.75rem}
+  textarea.q2-ans{width:100%;min-height:90px;font-size:14px;padding:8px 12px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#1a1a1a;resize:vertical;font-family:inherit;line-height:1.6}
+  textarea.q2-ans:focus{outline:none;border-color:#888}
+  .model-ans{background:#f5f5f0;border-radius:8px;padding:.9rem;font-size:13px;line-height:1.75;color:#444;margin-top:.75rem}
+  .model-ans-label{font-size:11px;color:#999;font-weight:600;margin-bottom:6px;display:block}
+  .retry-section{margin-top:1.5rem;border-top:1px solid #e0e0e0;padding-top:1.2rem}
+  .retry-label{font-size:13px;color:#888;margin-bottom:.75rem;font-weight:500}
+  .card.retry-card{border-color:#f5c6c6}
+  .q-label.danger{color:#c62828}
+  .done-msg{font-size:15px;color:#2e7d32;font-weight:500}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h2>고급 생명과학 18장</h2>
+    <p>유전자 발현 조절 — 빈칸 채우기 + 심화 주관식</p>
+  </div>
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('mission1',this)">미션 1 · 빈칸 채우기</button>
+    <button class="tab" onclick="switchTab('mission2',this)">미션 2 · 심화 주관식</button>
+  </div>
+
+  <div id="mission1" class="section active">
+    <div class="ctrl-row">
+      <button class="btn active-mode" id="btn-order" onclick="setMode('order')">순서대로</button>
+      <button class="btn" id="btn-shuffle" onclick="setMode('shuffle')">셔플</button>
+      <button class="btn primary" onclick="startMission1()">시작 / 재시작</button>
+      <span class="progress" id="m1-prog"></span>
+    </div>
+    <div class="score-bar">
+      <div class="score-chip">정답 <span id="m1-correct">0</span></div>
+      <div class="score-chip">오답 <span id="m1-wrong">0</span></div>
+    </div>
+    <div id="m1-card-area"></div>
+    <div class="retry-section" id="retry-area" style="display:none">
+      <div class="retry-label">⟳ 오답 문항 다시 풀기</div>
+      <div id="retry-card-area"></div>
+    </div>
+  </div>
+
+  <div id="mission2" class="section">
+    <div id="m2-area"></div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {q:"트립토판(trp)는 세균 생장에 필수적인 [____]으로, 배지에 충분할 경우 세균이 생성할 필요가 없다.",blank:"아미노산",hint:"4글자",explain:"trp는 세균 생장에 필수적인 아미노산이며, 배지에 충분할 경우 합성이 억제된다."},
+  {q:"trp 합성은 억제 가능 효소들에 의해 촉매되는 [____] 반응 경로를 따른다.",blank:"동화",hint:"2글자",explain:"trp 합성은 동화 반응 경로이며, 억제 가능 효소들이 촉매한다."},
+  {q:"오페론은 원핵생물의 유전자 조절 방식으로, DNA의 [____], 작동자, 구조 유전자를 포함한다.",blank:"프로모터",hint:"4글자",explain:"오페론은 프로모터, 작동자, 구조 유전자로 구성된 원핵생물 유전자 조절 단위이다."},
+  {q:"조절유전자(trpR)는 trp 유무에 무관하게 항상 발현되어 [____](비활)를 합성한다.",blank:"억제자",hint:"3글자",explain:"trpR은 항상 발현되어 비활성 억제자를 합성하며, trp와 결합 시 활성화된다."},
+  {q:"trp가 많을 때 억제자가 trp와 결합해 활성화되고, [____]에 결합해 오페론이 불활성화된다.",blank:"작동자",hint:"3글자",explain:"활성화된 억제자는 작동자에 결합하여 전사를 차단한다."},
+  {q:"억제자는 [____] 단백질로, 결합 부위가 두 군데이며 형태가 변화한다.",blank:"다른 자리 입체성",hint:"7글자 (알로스테릭)",explain:"억제자는 다른 자리 입체성(알로스테릭) 단백질로, 두 결합 부위를 가지며 입체구조가 변화한다."},
+  {q:"조절유전자(lacI)는 lac 유무에 무관하게 항상 발현되어 억제자([____])를 합성한다.",blank:"활성",hint:"2글자",explain:"lacI는 항상 발현되어 활성 억제자를 합성한다. trp 오페론과 반대로 기본 활성 상태이다."},
+  {q:"lacZ는 [____]를 암호화하여 젖당을 포도당과 갈락토오스로 가수분해한다.",blank:"베타-갈락토오스 가수분해효소",hint:"12글자",explain:"lacZ 유전자는 베타-갈락토오스 가수분해효소를 암호화하며 젖당 분해에 핵심적이다."},
+  {q:"유도자인 [____](젖당의 이성질체)와 억제자가 결합하면 억제자가 불활성화되고 오페론이 활성화된다.",blank:"알로락토오스",hint:"5글자",explain:"알로락토오스는 젖당의 이성질체로, 억제자와 결합하여 불활성화시키는 유도자이다."},
+  {q:"대장균은 단당류인 [____]를 젖당보다 선호한다.",blank:"포도당",hint:"3글자",explain:"대장균은 에너지 효율이 높은 포도당을 우선적으로 이용한다."},
+  {q:"포도당이 많을 때, ATP를 [____]로 합성하는 효소의 생성이 감소한다.",blank:"cAMP",hint:"4글자 (영문)",explain:"포도당이 충분하면 cAMP 합성 효소 활성이 줄어 cAMP 농도가 낮아진다."},
+  {q:"cAMP 형성이 줄어들면, [____](이화물질 활성화 단백질)의 활성이 줄어든다.",blank:"CAP",hint:"3글자 (영문)",explain:"cAMP는 CAP(CRP)와 결합하여 활성화시킨다. cAMP가 감소하면 CAP도 불활성화된다."},
+  {q:"CAP는 젖당 오페론의 [____]와 프로모터 간의 친화력을 높이는 역할을 한다.",blank:"RNA 중합 효소",hint:"6글자",explain:"활성화된 CAP는 RNA 중합 효소와 프로모터의 친화력을 높여 전사를 촉진한다."},
+  {q:"젖당과 포도당이 동시에 존재할 때는 cAMP 농도가 낮아 [____] 양의 lac mRNA가 합성된다.",blank:"적은",hint:"2글자",explain:"포도당 존재 시 cAMP 감소 → CAP 불활성화 → 전사 효율 감소 → 적은 mRNA 합성."},
+  {q:"포도당이 결핍되고 젖당만 존재할 때, cAMP 농도가 높아 [____] 양의 lac mRNA가 합성된다.",blank:"많은",hint:"2글자",explain:"포도당 결핍 시 cAMP 증가 → CAP 활성화 → RNA 중합 효소 친화력 증가 → 많은 mRNA 합성."},
+  {q:"히스톤 꼬리의 [____]는 염색체가 느슨해져 전사가 촉진되도록 한다.",blank:"아세틸화",hint:"4글자",explain:"히스톤 아세틸화는 히스톤과 DNA 간 인력을 약화시켜 염색질을 느슨하게 만들어 전사를 촉진한다."},
+  {q:"히스톤 꼬리의 [____]는 염색체를 응축하여 전사를 억제한다.",blank:"메틸화",hint:"3글자",explain:"히스톤 메틸화는 염색질을 응축시켜 전사인자 접근을 막아 전사를 억제한다."},
+  {q:"[____]은 부계 또는 모계 유전자의 메틸화로 인해 특정 형질이 한쪽 부모에 의해 결정되는 현상이다.",blank:"유전체 각인",hint:"5글자",explain:"유전체 각인은 에피제네틱 메틸화에 의해 부계 또는 모계 유전자만 발현되는 현상이다."},
+  {q:"후성 유전학에서는 음식 공급, 코르티솔 등 환경에 따른 개체 수준의 [____] 양상을 통해 발현을 조절한다.",blank:"메틸화",hint:"3글자",explain:"후성 유전학적 메틸화는 환경 자극에 반응하여 유전자 발현을 조절하는 중요한 기전이다."},
+];
+
+const Q2 = [
+  {num:"1",q:"젖당 오페론에서 포도당 농도에 따른 cAMP와 CAP의 작동 기전을 서술하시오.",model:"포도당 농도가 높으면 ATP를 cAMP로 합성하는 효소 활성이 감소하여 cAMP 형성이 줄어든다. cAMP 감소 시 CAP(이화물질 활성화 단백질)가 불활성화되어 프로모터와 RNA 중합 효소 간 친화력이 낮아지고 전사가 억제된다. 반대로 포도당이 결핍되면 cAMP 농도가 높아져 CAP가 활성화되고, CAP가 프로모터에 결합하여 RNA 중합 효소의 결합을 촉진함으로써 lac mRNA가 다량 합성된다."},
+  {num:"2",q:"trp 오페론과 lac 오페론의 억제자 초기 상태(활성/비활성)와 조절 방식의 차이를 비교하여 서술하시오.",model:"trp 오페론: 억제자는 초기에 비활성 상태이다. trp(공동억제자)가 충분할 때 억제자와 결합하여 활성화되고, 작동자에 결합하여 전사를 억제한다('있으니까 안 만든다'). lac 오페론: 억제자는 초기에 활성 상태이다. 알로락토오스(유도자, 젖당의 이성질체)가 존재할 때 억제자와 결합하여 불활성화되고, 작동자에서 떨어져 전사가 촉진된다('있으니까 써먹는다')."},
+  {num:"3",q:"히스톤 아세틸화와 메틸화가 전사에 미치는 영향을 각각 설명하고, 유전체 각인과의 관련성을 서술하시오.",model:"히스톤 아세틸화는 히스톤 꼬리의 양전하를 중화시켜 DNA와의 인력을 약화시키고, 염색질을 느슨하게 만들어 전사를 촉진한다. 히스톤 메틸화는 염색체를 응축시켜 전사인자 접근을 차단하고 전사를 억제한다. 유전체 각인은 부계 또는 모계 유전자의 특정 부위가 메틸화되어 한쪽 부모로부터 받은 유전자만 발현되는 현상으로, 에피제네틱 메틸화의 대표적 사례이다. 한 번 메틸화된 유전자는 세포 분열 이후에도 메틸화를 유지한다."},
+  {num:"4",q:"후성 유전학(에피제네틱스)에서 환경이 유전자 발현에 영향을 미치는 기전을 예를 들어 설명하시오.",model:"후성 유전학에서는 DNA 염기서열 자체는 변하지 않지만, 히스톤의 메틸화·아세틸화 등 화학적 변형이 유전자 발현을 조절한다. 예를 들어 코르티솔(스트레스 호르몬)이나 영양 공급 상태가 특정 유전자 부위의 메틸화 양상을 변화시켜 발현을 촉진하거나 억제한다. 이러한 메틸화 패턴은 세포 분열 후에도 유지될 수 있어 개체 수준의 장기적 발현 조절이 가능하다."},
+];
+
+let mode='order', m1idx=0, order=[], wrongList=[], correctCount=0, wrongCount=0;
+let retryList=[], retryIdx=0, m2shown=false;
+
+function switchTab(t, el){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(t).classList.add('active');
+  if(t==='mission2'&&!m2shown){renderM2();m2shown=true;}
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('btn-order').classList.toggle('active-mode',m==='order');
+  document.getElementById('btn-shuffle').classList.toggle('active-mode',m==='shuffle');
+}
+function startMission1(){
+  correctCount=0;wrongCount=0;wrongList=[];m1idx=0;
+  order=QUESTIONS.map((_,i)=>i);
+  if(mode==='shuffle'){for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}}
+  document.getElementById('retry-area').style.display='none';
+  document.getElementById('retry-card-area').innerHTML='';
+  updateScore();showM1Card();
+}
+function updateScore(){
+  document.getElementById('m1-correct').textContent=correctCount;
+  document.getElementById('m1-wrong').textContent=wrongCount;
+  document.getElementById('m1-prog').textContent=m1idx+'/'+QUESTIONS.length;
+}
+function showM1Card(){
+  const area=document.getElementById('m1-card-area');
+  if(m1idx>=QUESTIONS.length){
+    area.innerHTML='<div class="card"><div class="done-msg">모든 문항 완료! 🎉</div></div>';
+    if(wrongList.length>0){
+      document.getElementById('retry-area').style.display='block';
+      retryList=[...wrongList];retryIdx=0;showRetryCard();
+    }
+    return;
+  }
+  const q=QUESTIONS[order[m1idx]];
+  const displayed=q.q.replace('[____]','<span class="blank">____</span>');
+  area.innerHTML=`<div class="card">
+    <div class="q-label">문제 ${m1idx+1} / ${QUESTIONS.length}</div>
+    <div class="q-text">${displayed}</div>
+    <div class="hint">힌트: ${q.hint}</div>
+    <div class="ans-row">
+      <input class="ans-input" id="m1-input" type="text" placeholder="정답 입력..." />
+      <button class="btn primary" onclick="checkM1()">확인</button>
+    </div>
+    <div id="m1-feedback"></div>
+  </div>`;
+  const inp=document.getElementById('m1-input');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkM1();});
+}
+function checkM1(){
+  const q=QUESTIONS[order[m1idx]];
+  const val=document.getElementById('m1-input').value.trim();
+  const fb=document.getElementById('m1-feedback');
+  const correct=val===q.blank||val.replace(/\s/g,'')===q.blank.replace(/\s/g,'');
+  if(correct){
+    correctCount++;
+    fb.className='feedback correct';
+    fb.innerHTML='정답입니다! ✓';
+  } else {
+    wrongCount++;
+    wrongList.push(order[m1idx]);
+    fb.className='feedback wrong';
+    fb.innerHTML='오답. 정답: <strong>'+q.blank+'</strong><div class="explain">'+q.explain+'</div>';
+  }
+  updateScore();
+  setTimeout(()=>{m1idx++;updateScore();showM1Card();},correct?1000:2400);
+}
+function showRetryCard(){
+  const area=document.getElementById('retry-card-area');
+  if(retryIdx>=retryList.length){
+    area.innerHTML='<div class="card"><div class="done-msg">오답 재풀이 완료! 🎉</div></div>';
+    return;
+  }
+  const q=QUESTIONS[retryList[retryIdx]];
+  const displayed=q.q.replace('[____]','<span class="blank">____</span>');
+  area.innerHTML=`<div class="card retry-card">
+    <div class="q-label danger">오답 재풀이 ${retryIdx+1} / ${retryList.length}</div>
+    <div class="q-text">${displayed}</div>
+    <div class="hint">힌트: ${q.hint}</div>
+    <div class="ans-row">
+      <input class="ans-input" id="retry-input" type="text" placeholder="정답 입력..." />
+      <button class="btn primary" onclick="checkRetry()">확인</button>
+    </div>
+    <div id="retry-feedback"></div>
+  </div>`;
+  const inp=document.getElementById('retry-input');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkRetry();});
+}
+function checkRetry(){
+  const q=QUESTIONS[retryList[retryIdx]];
+  const val=document.getElementById('retry-input').value.trim();
+  const fb=document.getElementById('retry-feedback');
+  const correct=val===q.blank||val.replace(/\s/g,'')===q.blank.replace(/\s/g,'');
+  if(correct){
+    fb.className='feedback correct';
+    fb.innerHTML='정답입니다! ✓';
+  } else {
+    fb.className='feedback wrong';
+    fb.innerHTML='오답. 정답: <strong>'+q.blank+'</strong><div class="explain">'+q.explain+'</div>';
+  }
+  setTimeout(()=>{retryIdx++;showRetryCard();},correct?1000:2400);
+}
+function renderM2(){
+  const area=document.getElementById('m2-area');
+  area.innerHTML=Q2.map((item,i)=>`
+    <div class="q2-card">
+      <div class="q-label">심화 ${item.num}</div>
+      <div class="q2-text">${item.q}</div>
+      <textarea class="q2-ans" id="q2-ans-${i}" placeholder="여기에 답을 작성하세요..."></textarea>
+      <div class="ans-row" style="margin-top:8px">
+        <button class="btn primary" onclick="showModel(${i})">모범 답안 확인</button>
+      </div>
+      <div id="q2-model-${i}" style="display:none" class="model-ans">
+        <span class="model-ans-label">모범 답안</span>${item.model}
+      </div>
+    </div>
+  `).join('');
+}
+startMission1();
+</script>
+</body>
+</html>
