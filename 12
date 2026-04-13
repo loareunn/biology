@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급 생명과학 12장 · 세포주기 암기 프로그램</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #161820;
+    --bg3: #1e2028;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #e8eaf0;
+    --muted: #7a7f96;
+    --accent: #5b8af5;
+    --accent-dim: rgba(91,138,245,0.12);
+    --accent-glow: rgba(91,138,245,0.3);
+    --green: #4ade9a;
+    --green-dim: rgba(74,222,154,0.1);
+    --red: #f0637a;
+    --red-dim: rgba(240,99,122,0.1);
+    --amber: #f5c057;
+    --amber-dim: rgba(245,192,87,0.1);
+    --purple: #a78bfa;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+  #app { width: 100%; max-width: 680px; }
+
+  /* Header */
+  .site-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-top: 1rem;
+  }
+  .site-header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .site-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .site-header p { font-size: 14px; color: var(--muted); }
+
+  /* Cards */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  /* Mode grid */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
+  .mode-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.25rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-align: center;
+  }
+  .mode-card:hover {
+    border-color: var(--accent);
+    background: var(--bg3);
+    transform: translateY(-2px);
+  }
+  .mode-card .icon { font-size: 28px; margin-bottom: 10px; }
+  .mode-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .mode-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .b-blue { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-glow); }
+  .b-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,154,0.25); }
+  .b-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(240,99,122,0.25); }
+  .b-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,192,87,0.25); }
+  .b-purple { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+  .b-gray { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+  /* Buttons */
+  button {
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text);
+    padding: 8px 14px;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  button:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+  button.primary { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-glow); }
+  button.primary:hover { background: rgba(91,138,245,0.2); }
+  button.danger { background: var(--red-dim); color: var(--red); border-color: rgba(240,99,122,0.3); }
+  button.danger:hover { background: rgba(240,99,122,0.18); }
+  button.success { background: var(--green-dim); color: var(--green); border-color: rgba(74,222,154,0.3); }
+  button.success:hover { background: rgba(74,222,154,0.18); }
+
+  /* Inputs */
+  input[type=text], textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background: var(--bg3);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: border-color 0.2s;
+  }
+  input[type=text]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  textarea { min-height: 120px; resize: vertical; line-height: 1.65; }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    margin: 0.75rem 0;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Feedback */
+  .feedback {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 0.75rem 0;
+  }
+  .fb-ok { background: var(--green-dim); color: #a7f3d0; border: 1px solid rgba(74,222,154,0.2); }
+  .fb-no { background: var(--red-dim); color: #fca5a5; border: 1px solid rgba(240,99,122,0.2); }
+
+  /* Model answer */
+  .model-box {
+    background: var(--bg3);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text);
+    margin-top: 8px;
+  }
+
+  /* Blank span */
+  .blank {
+    display: inline-block;
+    border-bottom: 2px solid var(--accent);
+    min-width: 64px;
+    text-align: center;
+    padding: 0 4px;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Utility */
+  .row { display: flex; gap: 8px; align-items: flex-start; }
+  .row.center { align-items: center; }
+  .spacer { margin-bottom: 0.75rem; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .tag-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; letter-spacing: 0.05em; }
+
+  /* Summary */
+  .score-big { font-size: 52px; font-weight: 700; color: var(--accent); text-align: center; margin: 0.5rem 0; font-family: 'JetBrains Mono', monospace; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1rem 0; }
+  .stat-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-cell .num { font-size: 24px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .stat-cell .lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  /* Retry banner */
+  .retry-banner {
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,192,87,0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 1rem;
+    font-size: 13px;
+    color: var(--amber);
+    line-height: 1.6;
+  }
+  .retry-banner strong { display: block; margin-bottom: 3px; font-size: 12px; letter-spacing: 0.05em; }
+
+  /* Criteria box */
+  .criteria-box {
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,192,87,0.2);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    font-size: 13px;
+    color: var(--amber);
+    line-height: 1.65;
+    margin-top: 10px;
+  }
+  .criteria-box strong { display: block; font-size: 11px; letter-spacing: 0.05em; margin-bottom: 4px; color: rgba(245,192,87,0.7); }
+
+  @media (max-width: 480px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .site-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="site-header">
+    <div class="eyebrow">고급 생명과학</div>
+    <h1>12장 · 세포주기</h1>
+    <p>33개 빈칸 문제 + 4개 심화 주관식 · 오답 재도전 지원</p>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home">
+    <div class="mode-grid">
+      <div class="mode-card" onclick="startBlank()">
+        <div class="icon">✏️</div>
+        <h2>빈칸 채우기</h2>
+        <p>핵심 키워드를 직접 입력해 암기</p>
+      </div>
+      <div class="mode-card" onclick="startDeep()">
+        <div class="icon">🔬</div>
+        <h2>심화 주관식</h2>
+        <p>메커니즘 전체 서술 훈련</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLANK QUIZ -->
+  <div id="screen-blank" style="display:none">
+    <div class="row center spacer" style="flex-wrap:wrap;gap:8px">
+      <button onclick="goHome()">← 홈</button>
+      <span class="badge b-blue" id="bl-order-label"></span>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button id="btn-seq" class="primary" onclick="setOrder('seq')">순서대로</button>
+        <button id="btn-shuf" onclick="setOrder('shuf')">셔플</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="bl-prog" style="width:0%"></div></div>
+    <div class="row center spacer">
+      <span class="muted" id="bl-counter"></span>
+      <span id="bl-wrong-badge" class="badge b-amber" style="margin-left:auto;display:none"></span>
+    </div>
+    <div class="card">
+      <div class="tag-label" id="bl-tag"></div>
+      <p id="bl-q" style="font-size:15px;line-height:1.85;margin-bottom:0.75rem"></p>
+      <p class="muted spacer" id="bl-hint"></p>
+      <div class="row spacer">
+        <input type="text" id="bl-input" placeholder="정답 입력 후 Enter" onkeydown="if(event.key==='Enter')checkBlank()">
+        <button class="primary" onclick="checkBlank()">확인</button>
+      </div>
+      <div id="bl-feedback" style="display:none"></div>
+      <button id="bl-next" style="display:none;width:100%;margin-top:0.5rem" onclick="nextBlank()">다음 문제 →</button>
+    </div>
+  </div>
+
+  <!-- DEEP QUIZ -->
+  <div id="screen-deep" style="display:none">
+    <div class="row center spacer">
+      <button onclick="goHome()">← 홈</button>
+      <span class="badge b-purple">심화 주관식</span>
+      <span class="muted" style="margin-left:auto" id="dp-counter"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="dp-prog" style="width:0%"></div></div>
+    <div class="card">
+      <div class="badge b-amber spacer" id="dp-tag"></div>
+      <p id="dp-q" style="font-size:15px;line-height:1.85;margin-bottom:1rem"></p>
+      <textarea id="dp-input" placeholder="답안을 자유롭게 서술하세요..."></textarea>
+      <div style="margin-top:10px">
+        <button class="primary" style="width:100%" onclick="showModel()">모범답안 확인</button>
+      </div>
+      <div id="dp-model" style="display:none">
+        <div class="criteria-box">
+          <strong>자기 평가 기준</strong>
+          <span id="dp-criteria"></span>
+        </div>
+        <div class="model-box" id="dp-answer"></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="danger" style="flex:1" onclick="markDeep(false)">✕ 틀렸어요</button>
+          <button class="success" style="flex:1" onclick="markDeep(true)">✓ 맞았어요</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="screen-summary" style="display:none">
+    <div class="card" style="text-align:center">
+      <p class="muted spacer" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em">RESULT</p>
+      <div class="score-big" id="sum-score"></div>
+      <p class="muted spacer" id="sum-label"></p>
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="lbl">정답</div>
+          <div class="num" style="color:var(--green)" id="sum-ok"></div>
+        </div>
+        <div class="stat-cell">
+          <div class="lbl">오답</div>
+          <div class="num" style="color:var(--red)" id="sum-no"></div>
+        </div>
+      </div>
+      <div id="sum-retry-section" style="display:none">
+        <div class="retry-banner">
+          <strong>오답 항목</strong>
+          <span id="sum-retry-list"></span>
+        </div>
+        <button class="primary" style="width:100%;margin-bottom:8px" onclick="startRetry()">오답만 다시 풀기</button>
+      </div>
+      <button style="width:100%" onclick="goHome()">처음으로 돌아가기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BLANK_Q = [
+  {tag:"세포분열 기능", q:"세포분열의 기능에는 생식, <BLANK>와 발생, 조직의 재생이 있다.", blank:"생장", hint:"힌트: 2글자"},
+  {tag:"자매 염색분체", q:"복제 관계의 자매 염색분체는 각각 유전 정보가 동일한 하나의 <BLANK> 분자를 갖는다.", blank:"DNA", hint:"힌트: 3글자"},
+  {tag:"자매 염색분체", q:"자매 염색분체는 <BLANK> 단백질로 연결되어 있다.", blank:"코헤신", hint:"힌트: 3글자"},
+  {tag:"염색체", q:"염색체 수와 개체의 <BLANK>은(는) 비례하지 않는다.", blank:"복잡성", hint:"힌트: 3글자"},
+  {tag:"염색분체 분리", q:"염색분체의 분리는 체세포 분열과 <BLANK> 2분열에서 일어난다.", blank:"감수", hint:"힌트: 2글자"},
+  {tag:"G2기", q:"간기의 G2기에는 중심립 쌍으로 구성되며, <BLANK> 구조를 갖지 않는 중심체가 있다.", blank:"막", hint:"힌트: 1글자"},
+  {tag:"G2기", q:"간기의 G2기에는 rRNA와 단백질로 구성되며, 막 구조를 갖지 않는 <BLANK>이(가) 있다.", blank:"인", hint:"힌트: 1글자"},
+  {tag:"G2기", q:"<BLANK>로부터 방추체의 미세소관이 형성된다.", blank:"중심체", hint:"힌트: 3글자"},
+  {tag:"전기", q:"전기에는 염색체가 관찰(응축)되고, <BLANK>이(가) 소실된다.", blank:"인", hint:"힌트: 1글자"},
+  {tag:"전기", q:"전기에 <BLANK>가 형성된다.", blank:"방추체", hint:"힌트: 3글자"},
+  {tag:"전기", q:"방추체⊃성상체⊃중심체⊃중심립⊃미세소관⊃<BLANK> 단백질", blank:"튜불린", hint:"힌트: 3글자"},
+  {tag:"전중기", q:"전중기에는 <BLANK>이(가) 소실된다.", blank:"핵막", hint:"힌트: 2글자"},
+  {tag:"전중기", q:"전중기에 일부 미세소관(<BLANK>)이 염색체에 결합한다.", blank:"방추사", hint:"힌트: 3글자"},
+  {tag:"전중기", q:"전중기에 염색체에 결합하지 않은 미세소관은 <BLANK>과(와) 연결된다.", blank:"반대편", hint:"힌트: 3글자"},
+  {tag:"중기", q:"중기에는 염색체가 <BLANK>에 모인다.", blank:"중기판", hint:"힌트: 3글자"},
+  {tag:"후기", q:"후기는 <BLANK> 단백질이 끊어질 때 시작된다.", blank:"코헤신", hint:"힌트: 3글자"},
+  {tag:"말기", q:"말기에는 인이 다시 나타나고, 염색체의 응축이 풀어지며, <BLANK> 분열이 시작된다.", blank:"세포질", hint:"힌트: 3글자"},
+  {tag:"중심립", q:"중심립은 방추사 형성(필수)에 직접 관여하지 <BLANK>.", blank:"않는다", hint:"힌트: 3글자"},
+  {tag:"튜불린 분해", q:"튜불린 단백질은 중심체(극) 쪽이 아니라, 염색체의 <BLANK> 쪽에서 분해된다.", blank:"동원체", hint:"힌트: 3글자"},
+  {tag:"동물 세포분열", q:"동물 세포는 미세섬유의 수축환(<BLANK>+마이오신)에 의해 밖→안으로 분할된다.", blank:"액틴", hint:"힌트: 2글자"},
+  {tag:"식물 세포분열", q:"식물 세포는 소낭들(<BLANK> 기원)이 생성한 세포판(→세포벽)에 의해 안→밖으로 분할된다.", blank:"골지체", hint:"힌트: 3글자"},
+  {tag:"세균", q:"세균에서 <BLANK> 유사 단백질은 염색체 이동에 참여한다.", blank:"액틴", hint:"힌트: 2글자"},
+  {tag:"세균", q:"세균에서 <BLANK> 단백질이 막 함입(세포벽 형성)에 참여한다.", blank:"튜불린", hint:"힌트: 3글자"},
+  {tag:"세포주기 조절", q:"<BLANK>기나 M기 세포의 세포질에 존재하는 물질에 의해 해당 시기로의 진행이 조절된다.", blank:"S", hint:"힌트: 1글자"},
+  {tag:"MPF", q:"MPF(M기 촉진 인자)는 <BLANK>와 사이클린으로 구성된다.", blank:"Cdk", hint:"힌트: 3글자 (영문)"},
+  {tag:"MPF", q:"Cdk는 <BLANK> 의존성 인산화 효소이다.", blank:"사이클린", hint:"힌트: 4글자"},
+  {tag:"MPF", q:"MPF는 핵막 하층 분해, 방추체 형성 효소 활성, <BLANK> 응축에 관여한다.", blank:"염색체", hint:"힌트: 3글자"},
+  {tag:"MPF", q:"사이클린은 <BLANK>기부터 G2기까지 합성된다.", blank:"S", hint:"힌트: 1글자 (영문)"},
+  {tag:"MPF", q:"MPF는 세포분열을 촉진하며, <BLANK>기에 최대 활성을 보인다.", blank:"중", hint:"힌트: 1글자"},
+  {tag:"MPF", q:"후기에 <BLANK>이(가) 분해되어 M기가 끝나고, G1기까지 분해가 유지된다.", blank:"사이클린", hint:"힌트: 4글자"},
+  {tag:"G1 확인점", q:"G0기는 세포주기를 벗어나 분열하지 않는 상태로, <BLANK>과 성숙한 신경 세포가 해당된다.", blank:"근육", hint:"힌트: 2글자"},
+  {tag:"G1 확인점", q:"상처를 입으면 <BLANK>(PDGF)에 의해 G1기 확인점을 통과한다.", blank:"혈소판유래생장인자", hint:"힌트: 9글자"},
+  {tag:"G1 확인점", q:"PDGF에 의해 G1 확인점을 통과한 결과 결합조직의 <BLANK>가 분열된다.", blank:"섬유아세포", hint:"힌트: 5글자"},
+  {tag:"M 확인점", q:"M 확인점에서 모든 염색체에 방추사가 결합하면 <BLANK>를 받아 후기가 진행된다.", blank:"출발신호", hint:"힌트: 4글자"},
+  {tag:"M 확인점", q:"M 확인점에서 염색체 중 어느 하나라도 방추사가 결합하지 않으면 <BLANK>를 받는다.", blank:"정지신호", hint:"힌트: 4글자"},
+  {tag:"암세포", q:"암세포는 <BLANK>이나 밀도 의존성 억제를 보이지 않는다.", blank:"부착 의존성", hint:"힌트: 5글자"},
+  {tag:"악성종양", q:"악성종양의 전이에서는 <BLANK>이(가) 종양 쪽으로 자라게 하는 물질이 분비된다.", blank:"혈관", hint:"힌트: 2글자"},
+  {tag:"택솔", q:"택솔 항암제는 <BLANK> 형성을 억제하여 M기에서 간기로의 진행을 억제한다.", blank:"미세소관", hint:"힌트: 4글자"},
+];
+
+const DEEP_Q = [
+  {
+    tag:"세포질 분열",
+    q:"식물 세포와 동물 세포의 세포질 분열 방식 차이를 성분과 방향 측면에서 서술하시오.",
+    criteria:"수축환 성분(액틴+마이오신), 방향(밖→안) / 세포판 기원(골지체 소낭), 방향(안→밖) 각각 언급",
+    answer:"동물 세포는 미세섬유인 액틴과 마이오신으로 구성된 수축환이 수축하여 세포를 밖→안 방향으로 분할한다. 반면 식물 세포는 골지체 기원의 소낭들이 모여 세포판을 형성하고, 이 세포판이 안→밖 방향으로 확장되어 세포벽을 형성함으로써 세포가 분할된다."
+  },
+  {
+    tag:"MPF · G2 확인점",
+    q:"MPF의 구성 요소와 G2 확인점 통과 과정에서의 역할을 설명하시오.",
+    criteria:"구성(Cdk + 사이클린), 사이클린 합성 시기(S~G2기), MPF 형성→G2 확인점 통과, MPF의 역할(핵막 하층 분해·방추체 형성·염색체 응축), 후기 사이클린 분해 언급",
+    answer:"MPF(M기 촉진 인자)는 사이클린 의존성 인산화 효소(Cdk)와 사이클린으로 구성된다. 사이클린은 S기부터 G2기까지 합성되어 Cdk와 결합해 MPF를 형성하고, 이로써 세포는 G2 확인점을 통과하게 된다. MPF는 핵막 하층 분해, 방추체 형성 효소 활성화, 염색체 응축에 관여하며 중기에 최대 활성을 보인다. 이후 후기에 사이클린이 분해되면 MPF 활성이 소실되어 M기가 종료된다."
+  },
+  {
+    tag:"암세포",
+    q:"암세포가 일반 세포와 달리 무시하는 세포분열의 특징 2가지를 쓰고 각각을 설명하시오.",
+    criteria:"부착 의존성(고체 표면 필요), 밀도 의존성 억제(한 층 형성 시 정지) 각각 설명",
+    answer:"첫째, 부착 의존성이다. 정상 세포는 고체 표면에 부착되어야만 분열할 수 있으나, 암세포는 이를 무시하고 부착 없이도 증식한다. 둘째, 밀도 의존성 억제이다. 정상 세포는 한 층을 채우면 분열을 멈추지만, 암세포는 이를 무시하고 계속 증식하여 여러 층을 이루는 덩어리를 형성한다."
+  },
+  {
+    tag:"세포주기 확인점",
+    q:"세포주기 조절 시스템의 확인점 3가지를 쓰고, 각 확인점에서의 핵심 조절 내용을 서술하시오.",
+    criteria:"G1 확인점(PDGF·G0·섬유아세포), G2 확인점(MPF·통과), M 확인점(방추사 결합 여부·정지신호) 포함",
+    answer:"G1 확인점은 G1기에서 S기로의 진입을 결정한다. 상처 신호가 있을 때 혈소판유래생장인자(PDGF)가 작용해 섬유아세포 등이 확인점을 통과하며, 신호가 없으면 세포는 G0기로 진입해 분열을 멈춘다. G2 확인점은 M기 진입을 제어하며, MPF(Cdk+사이클린)가 활성화되어야 통과할 수 있다. M 확인점(중기→후기)은 모든 염색체에 방추사가 결합했는지 감시하며, 하나라도 결합하지 않으면 정지신호가 발생해 후기가 지연된다."
+  },
+];
+
+let mode='', order='seq', qList=[], idx=0, correct=0, wrongIds=[], isRetry=false;
+
+function goHome(){
+  ['screen-home','screen-blank','screen-deep','screen-summary'].forEach(id=>{
+    document.getElementById(id).style.display = id==='screen-home' ? '' : 'none';
+  });
+}
+
+function startBlank(retryList){
+  isRetry=!!retryList;
+  mode='blank';
+  qList = retryList ? retryList : [...BLANK_Q];
+  if(!isRetry && order==='shuf') qList=shuffle([...qList]);
+  idx=0; correct=0; wrongIds=[];
+  show('screen-blank');
+  renderBlank();
+}
+
+function startDeep(retryList){
+  isRetry=!!retryList;
+  mode='deep';
+  qList = retryList ? retryList : [...DEEP_Q];
+  idx=0; correct=0; wrongIds=[];
+  show('screen-deep');
+  renderDeep();
+}
+
+function show(id){
+  ['screen-home','screen-blank','screen-deep','screen-summary'].forEach(s=>{
+    document.getElementById(s).style.display = s===id ? '' : 'none';
+  });
+}
+
+function setOrder(o){
+  order=o;
+  document.getElementById('btn-seq').className = o==='seq' ? 'primary' : '';
+  document.getElementById('btn-shuf').className = o==='shuf' ? 'primary' : '';
+  if(!isRetry) startBlank();
+}
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderBlank(){
+  const q=qList[idx], total=qList.length;
+  document.getElementById('bl-counter').textContent=`${idx+1} / ${total}`;
+  document.getElementById('bl-prog').style.width=`${(idx/total)*100}%`;
+  document.getElementById('bl-tag').textContent='[ '+q.tag+' ]';
+  document.getElementById('bl-order-label').textContent = order==='seq' ? '순서대로' : '셔플';
+  document.getElementById('bl-q').innerHTML = q.q.replace('<BLANK>','<span class="blank">　　　</span>');
+  document.getElementById('bl-hint').textContent = q.hint;
+  document.getElementById('bl-input').value='';
+  document.getElementById('bl-input').disabled=false;
+  document.getElementById('bl-feedback').style.display='none';
+  document.getElementById('bl-next').style.display='none';
+  const wb=document.getElementById('bl-wrong-badge');
+  wb.style.display = wrongIds.length ? '' : 'none';
+  wb.textContent = '오답 '+wrongIds.length+'개';
+  setTimeout(()=>document.getElementById('bl-input').focus(),50);
+}
+
+function checkBlank(){
+  const q=qList[idx];
+  const ans=document.getElementById('bl-input').value.trim();
+  const fb=document.getElementById('bl-feedback');
+  fb.style.display='';
+  if(ans===q.blank){
+    correct++;
+    fb.className='feedback fb-ok';
+    fb.innerHTML='<strong>✓ 정답!</strong> 정확히 맞았습니다.';
+  } else {
+    const origIdx=BLANK_Q.findIndex(x=>x===q || (x.q===q.q && x.blank===q.blank));
+    if(origIdx>=0 && !wrongIds.includes(origIdx)) wrongIds.push(origIdx);
+    fb.className='feedback fb-no';
+    fb.innerHTML=`<strong>✕ 오답.</strong> 정답: <strong style="color:var(--accent)">${q.blank}</strong>
+      <div class="model-box" style="margin-top:8px">${q.q.replace('<BLANK>','<strong style="color:var(--accent)">'+q.blank+'</strong>')}</div>`;
+  }
+  document.getElementById('bl-input').disabled=true;
+  document.getElementById('bl-next').style.display='';
+}
+
+function nextBlank(){
+  document.getElementById('bl-input').disabled=false;
+  idx++;
+  if(idx>=qList.length) showSummary();
+  else renderBlank();
+}
+
+function renderDeep(){
+  const q=qList[idx], total=qList.length;
+  document.getElementById('dp-counter').textContent=`${idx+1} / ${total}`;
+  document.getElementById('dp-prog').style.width=`${(idx/total)*100}%`;
+  document.getElementById('dp-tag').textContent=q.tag;
+  document.getElementById('dp-q').textContent=q.q;
+  document.getElementById('dp-input').value='';
+  document.getElementById('dp-model').style.display='none';
+  document.getElementById('dp-criteria').textContent=q.criteria;
+  document.getElementById('dp-answer').textContent=q.answer;
+}
+
+function showModel(){
+  document.getElementById('dp-model').style.display='';
+}
+
+function markDeep(ok){
+  if(ok){ correct++; }
+  else {
+    const origIdx=DEEP_Q.findIndex(x=>x===qList[idx] || x.q===qList[idx].q);
+    if(origIdx>=0 && !wrongIds.includes(origIdx)) wrongIds.push(origIdx);
+  }
+  idx++;
+  if(idx>=qList.length) showSummary();
+  else renderDeep();
+}
+
+function showSummary(){
+  show('screen-summary');
+  const total=qList.length, pct=Math.round(correct/total*100);
+  document.getElementById('sum-score').textContent=pct+'%';
+  document.getElementById('sum-ok').textContent=correct;
+  document.getElementById('sum-no').textContent=total-correct;
+  document.getElementById('sum-label').textContent=`총 ${total}문항 중 ${correct}문항 정답`;
+  const retryEl=document.getElementById('sum-retry-section');
+  if(wrongIds.length>0 && !isRetry){
+    retryEl.style.display='';
+    const src = mode==='blank' ? BLANK_Q : DEEP_Q;
+    document.getElementById('sum-retry-list').textContent=wrongIds.map(i=>src[i].tag).join(', ');
+  } else {
+    retryEl.style.display='none';
+  }
+}
+
+function startRetry(){
+  const src = mode==='blank' ? BLANK_Q : DEEP_Q;
+  const list = wrongIds.map(i=>src[i]);
+  if(mode==='blank') startBlank(list);
+  else startDeep(list);
+}
+
+goHome();
+</script>
+</body>
+</html>
