@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고급 생명과학 전지전능 암기봇</title>
+    <style>
+        :root { --primary: #6366f1; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #22d3ee; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        #app { width: 95%; max-width: 900px; margin: 40px 0; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .chapter-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        button { padding: 12px; border-radius: 8px; border: none; background: var(--card); color: white; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #334155; }
+        button.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .quiz-container { background: var(--card); padding: 25px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .sentence { line-height: 2.2; font-size: 1.15rem; margin-bottom: 20px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 10px; border-left: 4px solid var(--primary); }
+        input[type="text"] { background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--accent); font-size: 1.1rem; text-align: center; outline: none; width: 120px; margin: 0 4px; }
+        input.correct { border-bottom-color: #4ade80; color: #4ade80; }
+        input.wrong { border-bottom-color: #f87171; color: #f87171; }
+        .hint-area { height: 25px; color: #94a3b8; font-size: 0.9rem; margin-bottom: 15px; text-align: center; font-weight: bold; }
+        .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .status { text-align: right; font-size: 0.8rem; color: #64748b; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="header">
+        <h1>🧬 고급 생명과학 완전 정복</h1>
+        <p>모든 문장을 빈칸으로 만들었습니다. 화이팅!</p>
+    </div>
+
+    <div class="chapter-select">
+        <button onclick="loadChapter(12)" id="btn12">12장. 세포주기</button>
+        <button onclick="loadChapter(17)" id="btn17">17장. 유전자 발현</button>
+        <button onclick="loadChapter(18)" id="btn18">18장. 발현 조절</button>
+    </div>
+
+    <div id="quiz-area" class="quiz-container" style="display:none;">
+        <div id="hint-area" class="hint-area"></div>
+        <div id="content"></div>
+        <div class="controls">
+            <button onclick="checkAnswers()" style="background: var(--accent); color: #000;">정답 확인</button>
+            <button onclick="nextQuestion()">다음 문장 (셔플)</button>
+            <button onclick="showAnswer()" style="background: #475569;">정답 보기</button>
+        </div>
+        <div id="status" class="status"></div>
+    </div>
+</div>
+
+<script>
+const rawData = {
+    12: [
+        "세포분열의 기능에는 {생식}, {생장과 발생}, {조직의 재생}이 있다.",
+        "복제 관계의 {자매 염색분체}는 각각 유전 정보가 동일한 하나의 {DNA} 분자를 갖는다.",
+        "자매 염색분체는 {코헤신} 단백질로 연결되어 있다.",
+        "염색체 수와 개체의 {복잡성}은 비례하지 않는다.",
+        "염색분체의 분리는 {체세포 분열}과 {감수 2분열}에서 일어난다.",
+        "간기의 G2기에는 {핵막}이 존재한다.",
+        "중심체는 {중심립} 쌍으로 구성되며, {막 구조}를 갖지 않는다.",
+        "인은 {rRNA}와 {단백질}로 구성되며, {막 구조}를 갖지 않는다.",
+        "중심체로부터 {방추체}의 {미세소관}이 형성된다.",
+        "전기에는 {염색체}가 관찰(응축)되고, {인}이 소실되며, {방추체}가 형성된다.",
+        "방추체 구성 요소의 크기 관계: 방추체 ⊃ {성상체} ⊃ {중심체} ⊃ {중심립} ⊃ {미세소관} ⊃ {튜불린} 단백질",
+        "전중기에는 {핵막}이 소실되고, 일부 미세소관({방추사})이 염색체에 결합한다.",
+        "염색체에 결합하지 않은 미세소관은 {반대편}과 연결된다.",
+        "중기에는 염색체가 {중기판}에 모인다.",
+        "후기는 {코헤신} 단백질이 끊어질 때 시작된다.",
+        "말기에는 {인}이 다시 나타나고, 염색체의 {응축}이 풀리며, {세포질 분열}이 시작된다.",
+        "{중심립}은 방추사 형성에 직접 관여(필수)하지 않는다.",
+        "식물에서와 같이 {중심립}이 없어도 세포분열은 일어난다.",
+        "튜불린 단백질은 중심체(극) 쪽이 아니라, 염색체의 {동원체} 쪽에서 분해된다.",
+        "동물 세포는 미세섬유의 {수축환}({액틴}+{마이오신})에 의해 {밖}에서 {안}으로 분할된다.",
+        "식물 세포는 {골지체} 기원의 {소낭}들이 생성한 {세포판}에 의해 {안}에서 {밖}으로 분할된다.",
+        "세균에는 {방추체}와 {미세소관}이 없다.",
+        "세균에서 {액틴} 유사 단백질은 염색체 이동에, {튜불린} 유사 단백질은 막 함입에 참여한다.",
+        "S기나 M기 세포의 {세포질}에 존재하는 물질에 의해 주기가 조절된다.",
+        "세포주기 조절 시스템에는 {G1 확인점}, {G2 확인점}, {M 확인점}이 있다.",
+        "MPF(M기 촉진 인자)는 {Cdk}와 {사이클린}으로 구성된다.",
+        "Cdk는 {사이클린 의존성 인산화 효소}의 약자이다.",
+        "인산화 효소는 {생장 시기} 동안 {불활성} 상태로 존재한다.",
+        "MPF는 {핵막 하층} 분해, {방추체 형성 효소} 활성, {염색체 응축}에 관여한다.",
+        "사이클린은 {S기}부터 {G2기}까지 합성된다.",
+        "MPF는 {중기}에 최대 활성을 보이며, {후기}에 사이클린이 분해된다.",
+        "G0기는 세포주기를 벗어난 상태로, {근육}과 성숙한 {신경} 세포가 해당된다.",
+        "간세포는 상처를 인식하면 {출발신호}가 분비되어 {G1기}로 돌아온다.",
+        "상처를 입으면 {PDGF}(혈소판유래생장인자)에 의해 {G1} 확인점을 통과한다.",
+        "그 결과 결합조직의 {섬유아세포}가 분열된다.",
+        "M 확인점에서는 모든 염색체에 {방추사}가 결합해야 {후기}가 진행된다.",
+        "세포분열의 특징에는 {부착 의존성}과 {밀도 의존성 억제}가 있다.",
+        "악성종양의 전이에서는 {혈관}이 종양 쪽으로 자라게 하는 물질이 분비된다.",
+        "택솔 항암제는 {미세소관} {탈중합}(분해)을 억제하여 세포분열을 중지시킨다."
+    ],
+    17: [
+        "아르기닌 합성 경로는 전구물질 - {오르니틴} - {시트룰린} - {아르기닌} 순이다.",
+        "결함 유전자가 암호화하는 효소가 관여하는 과정 {이후}의 물질을 첨가하면 자란다.",
+        "{1유전자-1효소설}: 유전자에 이상이 생기면 효소({물질대사})에 이상이 생긴다.",
+        "DNA({트리플렛코드}) -> RNA({코돈}) -> 단백질 과정을 {센트럴 도그마}라 한다.",
+        "원핵은 전사와 번역이 모두 {세포질}에서, 진핵은 전사는 {핵}, 번역은 {세포질}에서 일어난다.",
+        "진핵에서는 {TATA 상자}를 인식하는 {TBP}(전사인자)가 가장 먼저 DNA에 부착된다.",
+        "원핵은 전사인자가 관여하지 않아 {속도}와 {효율}이 높다.",
+        "진핵에서 mRNA 합성은 {RNA 중합효소 II}에 의해 일어난다.",
+        "RNA 중합효소 II는 친화력이 낮아 {전사인자}와 함께 {전사개시복합체}를 형성한다.",
+        "RNA 중합효소의 이동은 {3}’→{5}’ 방향, mRNA 신장은 {5}’→{3}’ 방향이다.",
+        "mRNA 가공 과정 3가지는 {5’캡}, {폴리A 꼬리}, {스플라이싱}이다.",
+        "5’캡은 안정성을 높이고 핵에서 {리보솜 이동}과 {결합}을 돕는다.",
+        "비번역부위({UTR})는 번역 효율을 조절하며 {엑손}에 포함된다.",
+        "RNA 중합효소가 {다중아데닐화} 신호를 인식한 후 전사가 종결된다.",
+        "스플라이싱은 {인트론}을 제거하고 {엑손}을 접합하는 과정이다.",
+        "아미노아실 tRNA 합성 효소의 수는 {아미노산}의 수와 동일하다.",
+        "번역자 tRNA의 3’ 말단에는 {아미노산 부착자리}가 있다.",
+        "번역 개시 시 {P자리}에 개시 tRNA가 결합하며, 개시코돈은 {AUG}이다.",
+        "리보솜은 {5}’→{3}’ 방향으로 이동하며 mRNA를 인식한다.",
+        "tRNA가 P자리에서 {E자리}로 이동할 때 폴리펩타이드가 {A자리}의 아미노산에 붙는다.",
+        "종결코돈에 도달하면 A자리에 {방출인자}가 결합하여 결합을 {가수분해}한다.",
+        "코돈의 3번째 염기와 안티코돈 1번째 염기의 엄격성이 낮은 현상은 {동요 현상}이다.",
+        "안티코돈 1번째가 {G}이면 코돈 3번째는 {C} 또는 {U}일 수 있다.",
+        "{SRP}(신호인식입자)가 {신호 펩타이드}에 결합하면 합성이 중단되었다가 소포체 부착 후 재개된다.",
+        "침묵 돌연변이는 {아미노산 서열}에 변화가 없는 경우이다."
+    ],
+    18: [
+        "트립토판 합성은 {억제 가능} 효소들에 의해 촉매되는 {동화} 반응 경로이다.",
+        "오페론은 {프로모터}, {작동자}, {구조 유전자}를 포함한다.",
+        "trp 오페론의 조절유전자({trpR})는 {비활성} 상태의 억제자를 합성한다.",
+        "트립토판이 많을 때 {억제자}가 트립토판과 결합해 활성화되어 전사를 {억제}한다.",
+        "lac 오페론의 조절유전자({lacI})는 {활성} 상태의 억제자를 합성한다.",
+        "lacZ는 {베타-갈락토오스 가수분해효소}를 암호화하여 젖당을 분해한다.",
+        "유도자인 {알로락토오스}가 억제자와 결합하면 억제자가 {불활성화}되어 전사가 일어난다.",
+        "포도당이 많으면 {cAMP} 형성이 줄어들어 {CAP}의 활성이 감소하고 전사가 억제된다.",
+        "히스톤 꼬리의 {아세틸화}는 염색체를 느슨하게 하여 전사를 {촉진}한다.",
+        "히스톤 꼬리의 {메틸화}는 염색체를 응축하여 전사를 {억제}한다.",
+        "부계 또는 모계 유전자의 메틸화로 특정 형질이 결정되는 현상은 {유전체 각인}이다.",
+        "{후성 유전학}은 환경에 따른 {메틸화} 양상을 통해 발현을 조절하는 것을 연구한다."
+    ]
+};
+
+let currentSet = [];
+let idx = 0;
+
+function loadChapter(n) {
+    document.querySelectorAll('.chapter-select button').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn'+n).classList.add('active');
+    currentSet = rawData[n].map(s => {
+        const answers = [];
+        const question = s.replace(/{([^}]+)}/g, (m, p1) => {
+            answers.push(p1);
+            return `<input type="text" data-ans="${p1}" onfocus="showHint('${p1.length}')">`;
+        });
+        return { question, answers };
+    }).sort(() => Math.random() - 0.5);
+    idx = 0;
+    document.getElementById('quiz-area').style.display = 'block';
+    render();
+}
+
+function render() {
+    if(idx >= currentSet.length) {
+        document.getElementById('content').innerHTML = "<h2>축하합니다! 해당 단원을 모두 완료했습니다.</h2>";
+        return;
+    }
+    const q = currentSet[idx];
+    document.getElementById('content').innerHTML = `<div class="sentence">${q.question}</div>`;
+    document.getElementById('hint-area').innerText = "";
+    document.getElementById('status').innerText = `문항: ${idx + 1} / ${currentSet.length}`;
+}
+
+function showHint(len) {
+    document.getElementById('hint-area').innerText = `현재 빈칸 힌트: ${len}글자`;
+}
+
+function checkAnswers() {
+    const inputs = document.querySelectorAll('#content input');
+    let allCorrect = true;
+    inputs.forEach(i => {
+        if(i.value.trim() === i.dataset.ans) i.className = 'correct';
+        else { i.className = 'wrong'; allCorrect = false; }
+    });
+}
+
+function showAnswer() {
+    document.querySelectorAll('#content input').forEach(i => {
+        i.value = i.dataset.ans;
+        i.className = 'correct';
+    });
+}
+
+function nextQuestion() {
+    idx = (idx + 1) % currentSet.length;
+    render();
+}
+</script>
+</body>
+</html>
